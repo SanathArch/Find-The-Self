@@ -10,7 +10,7 @@ export async function downloadGoldenThreadZip(data: any, userName?: string) {
   const mindMapFolder = zip.folder("Personality Mind Map");
 
   // Generate PDF
-  const pdfBlob = await generatePDFBlob(data);
+  const pdfBlob = await generatePDFBlob(data, userName);
   if (mainFolder) {
     mainFolder.file("report.pdf", pdfBlob);
   }

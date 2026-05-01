@@ -11,121 +11,201 @@ export async function generatePDFBlob(data: {
   thread: string;
   moat: string;
   combos: { a: string; b: string; desc: string; score: number }[];
-}): Promise<Blob> {
+}, userName?: string): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const PW = 210, M = 20;
   let y = 0;
-  const GOLD: [number, number, number] = [201, 168, 76];
-  const BG: [number, number, number] = [13, 13, 13];
-  const TXT: [number, number, number] = [240, 237, 230];
-  const MUT: [number, number, number] = [136, 136, 136];
+  
+  // Theme Colors
+  const CREAM: [number, number, number] = [249, 248, 244];
+  const INK: [number, number, number] = [44, 44, 36];
+  const OLIVE: [number, number, number] = [90, 90, 64];
+  const SAGE: [number, number, number] = [140, 147, 122];
+  const TAN: [number, number, number] = [235, 231, 223];
 
-  const fillBg = () => { doc.setFillColor(...BG); doc.rect(0, 0, PW, 297, 'F'); };
+  const fillBg = () => { doc.setFillColor(...CREAM); doc.rect(0, 0, PW, 297, 'F'); };
   const newPage = () => { doc.addPage(); fillBg(); y = 22; };
   const chk = (n: number) => { if (y + n > 275) newPage(); };
-  const hline = (col?: [number, number, number]) => { doc.setDrawColor(...(col || GOLD)); doc.setLineWidth(0.25); doc.line(M, y, PW - M, y); };
+  const hline = (col?: [number, number, number]) => { doc.setDrawColor(...(col || TAN)); doc.setLineWidth(0.2); doc.line(M, y, PW - M, y); };
   
-  const h1 = (t: string) => { chk(14); doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(...GOLD); doc.text(t, M, y); y += 9; };
-  const h2 = (t: string) => { chk(10); doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...GOLD); doc.text(t, M, y); y += 7; };
+  const h1 = (t: string) => { 
+    chk(14); 
+    doc.setFont('times', 'italic'); doc.setFontSize(22); doc.setTextColor(...OLIVE); 
+    doc.text(t, PW / 2, y, { align: 'center' }); 
+    y += 10; 
+  };
+  
+  const h2 = (t: string) => { 
+    chk(10); 
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...OLIVE); 
+    doc.text(t, M, y); 
+    y += 7; 
+  };
   
   const body = (t: string, col?: [number, number, number]) => {
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...(col || TXT));
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...(col || INK));
     const ls = doc.splitTextToSize(t, PW - M * 2); chk(ls.length * 5 + 2); doc.text(ls, M, y); y += ls.length * 5 + 2;
   };
 
   const sm = (t: string, col?: [number, number, number]) => {
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...(col || MUT));
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...(col || SAGE));
     const ls = doc.splitTextToSize(t, PW - M * 2); chk(ls.length * 4 + 1); doc.text(ls, M, y); y += ls.length * 4 + 1;
   };
 
-  const bar = (pct: number, w?: number) => {
-    const bw = w || (PW - M * 2);
-    doc.setFillColor(42, 42, 42); doc.roundedRect(M, y, bw, 2.5, 1, 1, 'F');
-    if (pct > 0) { doc.setFillColor(...GOLD); doc.roundedRect(M, y, bw * (pct / 100), 2.5, 1, 1, 'F'); }
-    y += 5;
+  const drawSlider = (val: number, label: string, xOffset: number, width: number) => {
+    doc.setFontSize(8); doc.setTextColor(...SAGE);
+    doc.text(label, xOffset, y);
+    doc.setTextColor(...OLIVE); doc.setFont('helvetica', 'bold');
+    doc.text(val.toString(), xOffset + width, y, { align: 'right' });
+    y += 2;
+    doc.setFillColor(...TAN); doc.roundedRect(xOffset, y, width, 1.5, 0.5, 0.5, 'F');
+    doc.setFillColor(...OLIVE); doc.roundedRect(xOffset, y, width * (val / 10), 1.5, 0.5, 0.5, 'F');
+    y += 6;
   };
 
   // COVER
-  fillBg(); y = 46;
-  doc.setFillColor(36, 22, 4);
-  doc.roundedRect(M - 4, y - 8, PW - M * 2 + 8, 58, 3, 3, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(...GOLD);
-  doc.text('Golden Thread Report', PW / 2, y + 7, { align: 'center' });
-  doc.setFont('helvetica', 'italic'); doc.setFontSize(10); doc.setTextColor(200, 190, 160);
-  const tl = doc.splitTextToSize(data.thread, PW - M * 2 - 8);
-  doc.text(tl, PW / 2, y + 19, { align: 'center' });
-  y += 64;
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...MUT);
-  doc.text(`Generated ${new Date().toLocaleDateString()}`, PW / 2, y, { align: 'center' });
-  y += 8;
+  fillBg(); y = 50;
+  // Logo placeholder (the circle/thread icon)
+  doc.setDrawColor(...OLIVE); doc.circle(PW / 2, y, 12, 'S');
+  doc.line(PW / 2 - 6, y + 6, PW / 2, y - 6);
+  doc.line(PW / 2, y - 6, PW / 2 + 6, y + 6);
+  y += 25;
+
+  doc.setFont('times', 'bolditalic'); doc.setFontSize(32); doc.setTextColor(...INK);
+  const titleText = userName ? `${userName}'s Golden Thread` : 'Your Golden Thread';
+  doc.text(titleText, PW / 2, y, { align: 'center' });
+  y += 15;
+
+  
+  doc.setFont('times', 'italic'); doc.setFontSize(14); doc.setTextColor(...OLIVE);
+  const threadText = doc.splitTextToSize(data.thread, PW - M * 2 - 10);
+  doc.text(threadText, PW / 2, y, { align: 'center' });
+  y += threadText.length * 7 + 10;
+
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...SAGE);
+  doc.text(`A journey discovered on ${new Date().toLocaleDateString()}`, PW / 2, y, { align: 'center' });
+  y += 15;
+
   if (data.topW.length) {
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...GOLD);
-    doc.text('Core themes:  ' + data.topW.join('  ·  '), PW / 2, y, { align: 'center' });
-    y += 8;
+    const themes = data.topW.map(w => w.toUpperCase()).join('  •  ');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...OLIVE);
+    doc.text(themes, PW / 2, y, { align: 'center' });
   }
 
-  // PAGE 2: Interests
-  newPage(); h1('Your Interests & Scores'); y += 3; hline(); y += 5;
+  // PAGE 2: The Curiosity Audit (Testimonial Section)
+  newPage(); 
+  h1('The Curiosity Audit');
+  sm('Your raw entries and the sparks that lead to your discovery.', [120, 120, 110]);
+  y += 5;
+
   data.isc.forEach((item, i) => {
-    chk(26);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...TXT);
-    doc.text(`${String(i + 1).padStart(2, '0')}  ${item.name}`, M, y);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...GOLD);
-    doc.text(`${item.total.toFixed(1)}/10`, PW - M, y, { align: 'right' });
-    y += 5; bar(Math.round((item.total / 10) * 100));
-    if (item.why) sm(`"${item.why.slice(0, 150)}${item.why.length > 150 ? '...' : ''}"`);
-    const ds = DIMS.map(d => `${d.l}: ${item.scores[d.k] || 5}`).join('   ');
-    sm(ds, [75, 75, 75]); y += 3;
+    chk(45);
+    // Card Background
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...TAN);
+    doc.roundedRect(M - 2, y - 4, PW - M * 2 + 4, 40, 2, 2, 'FD');
+    
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...OLIVE);
+    doc.text(`${item.name}`, M, y + 2);
+    
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...OLIVE);
+    doc.text(`${item.total.toFixed(1)}/10`, PW - M, y + 2, { align: 'right' });
+    
+    y += 8;
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(...INK);
+    const whyText = doc.splitTextToSize(`"${item.why || 'No spark recorded.'}"`, PW - M * 2 - 4);
+    doc.text(whyText, M, y);
+    y += whyText.length * 4.5 + 4;
+
+    // Sliders
+    const sliderW = (PW - M * 2 - 10) / 2;
+    const startY = y;
+    drawSlider(item.scores.energy, 'Energy Audit', M, sliderW);
+    drawSlider(item.scores.leverage, 'Leverage', M, sliderW);
+    
+    const secondColY = startY;
+    y = secondColY;
+    drawSlider(item.scores.skill, 'Competence', M + sliderW + 10, sliderW);
+    drawSlider(item.scores.longevity, 'Longevity', M + sliderW + 10, sliderW);
+    
+    y += 4;
   });
-  y += 3; hline(); y += 5;
-  
-  h2('The Category of One Strategy');
-  body(data.moat, [200, 200, 200]);
-  y += 3; hline(); y += 5;
-  
-  h2('Dimension Averages');
-  DIMS.forEach(d => {
-    chk(9);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...TXT);
+
+  // PAGE 3: Strategy & Moat
+  newPage();
+  h1('Your Dimension Profile');
+  sm('Aggregate alignment across all four core pillars of the Golden Thread.', [120, 120, 110]);
+  y += 5;
+
+  // Simple visual representation of Dimension Averages
+  const chartW = PW - M * 2;
+  DIMS.forEach((d, i) => {
+    chk(15);
+    const val = data.agg[d.k] || 5;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...INK);
     doc.text(d.l, M, y);
-    doc.setTextColor(...GOLD); doc.text(`${data.agg[d.k].toFixed(1)}/10`, PW - M, y, { align: 'right' });
-    y += 4; bar(Math.round((data.agg[d.k] / 10) * 100));
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...SAGE);
+    doc.text(`${val.toFixed(1)}/10`, PW - M, y, { align: 'right' });
+    y += 2;
+    doc.setFillColor(...TAN); doc.roundedRect(M, y, chartW, 2, 0.5, 0.5, 'F');
+    doc.setFillColor(...SAGE); doc.roundedRect(M, y, chartW * (val / 10), 2, 0.5, 0.5, 'F');
+    y += 8;
   });
 
-  // PAGE 3: Combinations
-  newPage(); h1('Interest Synergy Map');
-  body('How each pair of your interests amplifies the other — sorted by synergy strength.', MUT);
-  y += 3; hline(); y += 6;
-  data.combos.forEach((c, idx) => {
-    chk(32);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...GOLD);
-    doc.text(`${c.a}  ↔  ${c.b}`, M, y);
-    const str = Math.min(5, Math.max(1, Math.round(c.score * 5)));
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
-    doc.text('●'.repeat(str) + '○'.repeat(5 - str), PW - M, y, { align: 'right' });
-    y += 6;
-    const plain = c.desc.replace(/\*\*/g, '');
-    sm(plain);
-    y += 3;
-    if (idx < data.combos.length - 1) { doc.setDrawColor(42, 42, 42); doc.setLineWidth(0.15); doc.line(M, y, PW - M, y); y += 4; }
-  });
+  y += 5;
+  h2('Your Unique Moat');
+  body(data.moat);
+  y += 8;
 
-  // PAGE 4: Paths
-  newPage(); h1('Your Best-Fit Paths');
-  body('Ranked by alignment with your scores across all four dimensions.', MUT);
-  y += 3; hline(); y += 6;
-  data.ps.forEach((p, i) => {
+  h2('Best-Fit Paths');
+  data.ps.slice(0, 3).forEach((p, i) => {
+    chk(30);
     const pct = Math.round((p.score / 30) * 100);
-    chk(28);
-    if (i === 0) { doc.setFillColor(36, 22, 4); doc.roundedRect(M - 3, y - 4, PW - M * 2 + 6, 25, 2, 2, 'F'); doc.setDrawColor(...GOLD); doc.setLineWidth(0.25); doc.roundedRect(M - 3, y - 4, PW - M * 2 + 6, 25, 2, 2, 'S'); }
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...GOLD);
-    doc.text(i === 0 ? '✦ BEST MATCH' : '#' + String(i + 1).padStart(2, '0'), M, y);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...TXT);
-    y += 5; doc.text(p.n, M, y);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...MUT);
-    doc.text(`${pct}% match`, PW - M, y, { align: 'right' });
-    y += 5; sm(p.d); bar(pct); y += 4;
+    doc.setFillColor(255, 255, 255); // White bg
+    doc.setDrawColor(...(i === 0 ? [90, 90, 64] : TAN));
+    doc.roundedRect(M - 2, y - 4, PW - M * 2 + 4, 22, 2, 2, 'FD');
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...OLIVE);
+    doc.text(p.n, M, y + 2);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...SAGE);
+    doc.text(`${pct}% Match`, PW - M, y + 2, { align: 'right' });
+
+    y += 6;
+    doc.setFontSize(8); doc.setTextColor(...INK);
+    const desc = doc.splitTextToSize(p.d, PW - M * 2 - 4);
+    doc.text(desc, M, y);
+    y += desc.length * 4 + 4;
   });
+
+
+  // PAGE 4: Synergy Map
+  newPage();
+  h1('Interest Synergy Map');
+  y += 5;
+  data.combos.slice(0, 6).forEach((c, idx) => {
+    chk(25);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...OLIVE);
+    doc.text(`${c.a} + ${c.b}`, M, y);
+    
+    const str = Math.min(5, Math.max(1, Math.round(c.score * 5)));
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...OLIVE);
+    doc.text('✦'.repeat(str) + '✧'.repeat(5 - str), PW - M, y, { align: 'right' });
+    
+    y += 4;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...INK);
+    const plain = c.desc.replace(/\*\*/g, '');
+    const comboDesc = doc.splitTextToSize(plain, PW - M * 2);
+    doc.text(comboDesc, M, y);
+    y += comboDesc.length * 4 + 6;
+    
+    doc.setDrawColor(...TAN); doc.line(M, y - 2, PW - M, y - 2);
+    y += 2;
+  });
+
+  // Footer on last page
+  doc.setFont('times', 'italic'); doc.setFontSize(8); doc.setTextColor(...SAGE);
+  doc.text('"The people most at risk aren\'t the generalists. They\'re the ones who went too narrow, too early."', PW / 2, 285, { align: 'center' });
 
   return doc.output('blob');
 }
+
