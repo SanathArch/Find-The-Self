@@ -177,6 +177,7 @@ export default function App() {
       combos, 
       thread,
       deepDives: aiData?.deepDives,
+      moat: aiData?.moat || "Your unique moat is built on the intersection of deep discipline and high-leverage curiosity. Others stop at the surface; you find the hidden connections that create rare value.",
       mindMap: aiData?.mindMap
     });
   };
@@ -476,6 +477,17 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Moat Analysis */}
+                  <div className="bg-olive/5 border border-olive/20 rounded-2xl p-6 space-y-3 shadow-sm border-dashed">
+                    <div className="flex items-center gap-2 text-olive font-serif font-bold italic">
+                      <Layers size={18} />
+                      Your Unique Moat
+                    </div>
+                    <p className="text-xs text-ink leading-relaxed italic">
+                      {results.moat}
+                    </p>
                   </div>
 
                   {/* Interest Analysis Breakdown */}

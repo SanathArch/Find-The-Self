@@ -26,20 +26,23 @@ export async function analyzeInterests(interests: Interest[]) {
     
     Context from Mastery Frameworks:
     1. The Curiosity Audit: Identify what specifically sparks engagement in each domain.
-    2. Energy Management: Analyze how these interests collectively recharge the individual.
+    2. Energy Management: Analyze how these interests collectively recharge the individual (Energy Givers).
     3. Category of One: Find the unique monopoly of value at the intersection of these disparate fields.
+    4. Moats and Leverage: Identify which combinations create "defensible edges" or high leverage (Code, Capital, Content, Media).
     
     Tasks:
-    1. For each interest, provide a "Deep Dive" (1-2 sentences) exploring its role in their energy portfolio and the "Category of One" potential.
+    1. For each interest, provide a "Deep Dive" (1-2 sentences) exploring its role in their energy portfolio and its potential as a "Leverage Point".
     2. Analyze the synergy between pairs of interests (max 5 key pairs).
-    3. Determine a core "Golden Thread" statement (1-2 powerful sentences).
-    4. Generate content for a "Personality Mind Map" in Markdown format, highlighting the "Connectivity" and "Leverage Points".
+    3. Determine a core "Golden Thread" statement (1-2 powerful sentences) defining their unique monopoly.
+    4. Define a "Moat Analysis" (strengths that are hard to replicate).
+    5. Generate content for a "Personality Mind Map" in Markdown format.
     
     Return the response as JSON with the following structure:
     {
       "deepDives": { "interestName": "analysis..." },
       "synergies": [ { "a": "interestA", "b": "interestB", "desc": "why they amplify each other", "score": 0.9 } ],
       "goldenThread": "The core theme...",
+      "moat": "Description of why this intersection is rare and valuable...",
       "mindMap": "# Personality Mind Map\\n\\n## Interests\\n...\\n\\n## Connectivity & Leverage\\n..."
     }
   `;
@@ -71,9 +74,10 @@ export async function analyzeInterests(interests: Interest[]) {
               }
             },
             goldenThread: { type: Type.STRING },
+            moat: { type: Type.STRING },
             mindMap: { type: Type.STRING }
           },
-          required: ["deepDives", "synergies", "goldenThread", "mindMap"]
+          required: ["deepDives", "synergies", "goldenThread", "moat", "mindMap"]
         }
       }
     });

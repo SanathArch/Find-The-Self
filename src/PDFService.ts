@@ -9,6 +9,7 @@ export async function generatePDFBlob(data: {
   ps: (Path & { score: number })[];
   topW: string[];
   thread: string;
+  moat: string;
   combos: { a: string; b: string; desc: string; score: number }[];
 }): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -76,7 +77,13 @@ export async function generatePDFBlob(data: {
     const ds = DIMS.map(d => `${d.l}: ${item.scores[d.k] || 5}`).join('   ');
     sm(ds, [75, 75, 75]); y += 3;
   });
-  y += 3; hline(); y += 5; h2('Dimension Averages');
+  y += 3; hline(); y += 5;
+  
+  h2('The Category of One Strategy');
+  body(data.moat, [200, 200, 200]);
+  y += 3; hline(); y += 5;
+  
+  h2('Dimension Averages');
   DIMS.forEach(d => {
     chk(9);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...TXT);
