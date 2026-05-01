@@ -3,10 +3,10 @@ export interface Interest {
   name: string;
   why: string;
   scores: {
-    passion: number;
+    energy: number;
     skill: number;
-    impact: number;
-    future: number;
+    leverage: number;
+    longevity: number;
   };
 }
 

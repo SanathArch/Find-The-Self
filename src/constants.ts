@@ -1,18 +1,18 @@
 import { Dimension, Path } from './types';
 
 export const DIMS: Dimension[] = [
-  { k: 'passion', l: 'Passion', t: 'How excited does this make you?' },
-  { k: 'skill', l: 'Natural skill', t: 'How naturally good are you?' },
-  { k: 'impact', l: 'World impact', t: 'How much could this help others?' },
-  { k: 'future', l: 'Future fit', t: 'How relevant in 10 years?' },
+  { k: 'energy', l: 'Energy Audit', t: 'Does this soul-recharge (+10) or drain (1)?' },
+  { k: 'skill', l: 'Competence', t: 'How naturally good are you at this?' },
+  { k: 'leverage', l: 'Leverage', t: 'Can this scale? (Capital, Code, Content, Media)' },
+  { k: 'longevity', l: 'Longevity', t: 'Will this matter in 10-20 years?' },
 ];
 
 export const PATHS: Path[] = [
-  { n: 'The Synthesiser', d: 'Combines domains to create novel insights. Your range is your edge.', w: { passion: 0.3, skill: 0.25, impact: 0.25, future: 0.2 } },
-  { n: 'The Curator', d: 'Wide taste, filters signal from noise. Makes sense of information overload.', w: { passion: 0.35, skill: 0.2, impact: 0.2, future: 0.25 } },
-  { n: 'The Builder-Connector', d: 'Prototypes ideas and connects them to markets. Thrives as a creative founder.', w: { passion: 0.2, skill: 0.3, impact: 0.25, future: 0.25 } },
-  { n: 'The Translator', d: 'Bridges technical and non-technical worlds. More critical as AI capability grows.', w: { passion: 0.2, skill: 0.3, impact: 0.3, future: 0.2 } },
-  { n: 'The Practitioner-Teacher', d: 'Learns deeply, then teaches it. High value as AI democratises tools.', w: { passion: 0.3, skill: 0.25, impact: 0.3, future: 0.15 } },
+  { n: 'The Synthesis Alpha', d: 'The "Category of One". You combine high-leverage domains to create a unique monopoly of value.', w: { energy: 0.3, skill: 0.25, leverage: 0.25, longevity: 0.2 } },
+  { n: 'The Chief Curator', d: 'Filters signal from noise in high-leverage fields. You profit from information scarcity.', w: { energy: 0.35, skill: 0.2, leverage: 0.2, longevity: 0.25 } },
+  { n: 'The Scalable Builder', d: 'Uses code and content to automate insights. Thrives as a solo-capitalist.', w: { energy: 0.2, skill: 0.3, leverage: 0.35, longevity: 0.15 } },
+  { n: 'The High-Value Bridge', d: 'Bridges technical leverage with human empathy. Indispensable in the AI era.', w: { energy: 0.2, skill: 0.3, leverage: 0.2, longevity: 0.3 } },
+  { n: 'The Deep Practitioner', d: 'Masters the "bore to death" skills that others quit. Your discipline is your moate.', w: { energy: 0.3, skill: 0.25, leverage: 0.15, longevity: 0.3 } },
 ];
 
 export const CORES: Record<string, string> = {

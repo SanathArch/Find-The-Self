@@ -9,12 +9,13 @@ import { analyzeInterests } from './GeminiService';
 import { downloadGoldenThreadZip } from './ZipService';
 
 export default function App() {
-  const [step, setStep] = useState(0);
+  const [userName, setUserName] = useState('');
+  const [step, setStep] = useState(-1);
   const [interests, setInterests] = useState<Interest[]>([
-    { id: '1', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
-    { id: '2', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
-    { id: '3', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
-    { id: '4', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
+    { id: '1', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
+    { id: '2', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
+    { id: '3', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
+    { id: '4', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
   ]);
   const [isRecording, setIsRecording] = useState<string | null>(null);
   const [results, setResults] = useState<any>(null);
@@ -64,7 +65,7 @@ export default function App() {
       id: Math.random().toString(36).substr(2, 9), 
       name: '', 
       why: '', 
-      scores: { passion: 5, skill: 5, impact: 5, future: 5 } 
+      scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } 
     }]);
   };
 
@@ -122,7 +123,7 @@ export default function App() {
       name: i.name,
       why: i.why,
       scores: i.scores,
-      total: (i.scores.passion + i.scores.skill + i.scores.impact + i.scores.future) / 4
+      total: (i.scores.energy + i.scores.skill + i.scores.leverage + i.scores.longevity) / 4
     })).sort((a, b) => b.total - a.total);
 
     const agg: Record<string, number> = {};
@@ -183,10 +184,10 @@ export default function App() {
   const reset = () => {
     setStep(0);
     setInterests([
-      { id: '1', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
-      { id: '2', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
-      { id: '3', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
-      { id: '4', name: '', why: '', scores: { passion: 5, skill: 5, impact: 5, future: 5 } },
+      { id: '1', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
+      { id: '2', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
+      { id: '3', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
+      { id: '4', name: '', why: '', scores: { energy: 5, skill: 5, leverage: 5, longevity: 5 } },
     ]);
     setResults(null);
   };
@@ -255,6 +256,41 @@ export default function App() {
         </div>
 
         <AnimatePresence mode="wait">
+          {step === -1 && (
+            <motion.section 
+              key="stepName"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              className="max-w-md mx-auto py-12 text-center space-y-8"
+            >
+              <div className="space-y-4">
+                <h2 className="font-serif text-3xl font-bold text-olive">Welcome, Traveler.</h2>
+                <p className="text-sage text-sm italic">Before we start weaving your thread, what shall we call you?</p>
+              </div>
+              
+              <div className="space-y-4">
+                <input 
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="Enter your name..."
+                  autoFocus
+                  className="w-full text-center bg-white border border-tan rounded-xl p-4 text-lg font-serif italic text-olive outline-none focus:border-olive shadow-sm transition-all"
+                  onKeyDown={(e) => e.key === 'Enter' && userName.trim() && setStep(0)}
+                />
+                
+                <button 
+                  onClick={() => userName.trim() && setStep(0)}
+                  disabled={!userName.trim()}
+                  className="px-10 py-3 bg-olive text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all disabled:opacity-30 disabled:translate-y-0 hover:-translate-y-0.5"
+                >
+                  Begin the discovery
+                </button>
+              </div>
+            </motion.section>
+          )}
+
           {step === 0 && (
             <motion.section 
               key="step0"
@@ -316,20 +352,20 @@ export default function App() {
             >
               <div className="space-y-1">
                 <span className="font-mono text-[10px] tracking-widest text-olive uppercase">Step 02 of 04</span>
-                <h2 className="font-serif text-2xl font-bold">Why do these pull you in?</h2>
-                <p className="text-sage text-sm">For each interest, describe what draws you to it. Tap the mic to speak instead of type.</p>
+                <h2 className="font-serif text-2xl font-bold">The Curiosity Audit</h2>
+                <p className="text-sage text-sm">For each interest, pinpoint the "Spark". What was the specific moment, problem, or observation that pulled you in?</p>
               </div>
 
               <div className="space-y-4">
                 {interests.filter(i => i.name.trim()).map((interest) => (
                   <div key={interest.id} className="bg-white border border-tan rounded-xl p-4 space-y-3 focus-within:border-olive transition-colors shadow-sm shadow-black/5">
                     <div className="text-[11px] font-mono text-olive tracking-wide">◆ {interest.name}</div>
-                    <p className="text-[12px] text-sage">What feeling or problem does this connect to?</p>
+                    <p className="text-[12px] text-sage">What specifically sparked this? What problem does it solve for you?</p>
                     <div className="flex gap-3 items-start">
                       <textarea 
                         value={interest.why}
                         onChange={(e) => updateInterest(interest.id, 'why', e.target.value)}
-                        placeholder="I love it because..."
+                        placeholder="I was first curious when... It helps me..."
                         className="bg-transparent border-none outline-none w-full text-sm leading-relaxed resize-none h-20 placeholder-sage/30"
                       />
                       <button 
@@ -554,10 +590,10 @@ export default function App() {
                   {/* Footer Actions */}
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
                     <button 
-                      onClick={() => downloadGoldenThreadZip(results)}
+                      onClick={() => downloadGoldenThreadZip(results, userName)}
                       className="px-8 py-3 bg-olive text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all flex items-center gap-2"
                     >
-                      <Download size={16} /> Download Bundle (ZIP)
+                      <Download size={16} /> Download {userName ? `${userName}'s` : 'My'} Bundle (ZIP)
                     </button>
                     <button 
                       onClick={reset}

@@ -1,8 +1,9 @@
 import JSZip from 'jszip';
 import { generatePDFBlob } from './PDFService';
 
-export async function downloadGoldenThreadZip(data: any) {
+export async function downloadGoldenThreadZip(data: any, userName?: string) {
   const zip = new JSZip();
+  const safeName = userName?.trim().replace(/[^a-z0-9]/gi, '_') || "Explorer";
 
   // Create folders
   const mainFolder = zip.folder("the golden thread");
@@ -30,7 +31,7 @@ export async function downloadGoldenThreadZip(data: any) {
   const url = URL.createObjectURL(content);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "Golden_Thread_Report_Bundle.zip";
+  link.download = `${safeName}_Golden_Thread_Report_Bundle.zip`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
