@@ -2,7 +2,7 @@ import { jsPDF } from 'jspdf';
 import { Interest, Path, Dimension } from './types';
 import { DIMS } from './constants';
 
-export async function downloadPDF(data: {
+export async function generatePDFBlob(data: {
   ints: string[];
   isc: { name: string; why: string; scores: Record<string, number>; total: number }[];
   agg: Record<string, number>;
@@ -10,7 +10,7 @@ export async function downloadPDF(data: {
   topW: string[];
   thread: string;
   combos: { a: string; b: string; desc: string; score: number }[];
-}) {
+}): Promise<Blob> {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const PW = 210, M = 20;
   let y = 0;
@@ -120,5 +120,5 @@ export async function downloadPDF(data: {
     y += 5; sm(p.d); bar(pct); y += 4;
   });
 
-  doc.save('golden-thread-report.pdf');
+  return doc.output('blob');
 }

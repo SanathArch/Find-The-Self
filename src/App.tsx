@@ -5,7 +5,8 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } fro
 import { Interest, Path, Combination } from './types';
 import { DIMS, PATHS, PLACEHOLDERS } from './constants';
 import { makeComboDesc } from './utils';
-import { downloadPDF } from './PDFService';
+import { analyzeInterests } from './GeminiService';
+import { downloadGoldenThreadZip } from './ZipService';
 
 export default function App() {
   const [step, setStep] = useState(0);
@@ -97,18 +98,25 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
-  const handleToResults = () => {
+  const handleToResults = async () => {
     setStep(3);
     setAnalyzing(true);
     window.scrollTo(0, 0);
     
-    setTimeout(() => {
+    try {
+      const validInts = interests.filter(i => i.name.trim());
+      const aiResults = await analyzeInterests(validInts);
+      
+      calculateResults(aiResults);
+    } catch (error) {
+      console.error("AI Analysis failed, falling back to basic calculation", error);
       calculateResults();
+    } finally {
       setAnalyzing(false);
-    }, 2500);
+    }
   };
 
-  const calculateResults = () => {
+  const calculateResults = (aiData?: any) => {
     const validInts = interests.filter(i => i.name.trim());
     const isc = validInts.map(i => ({
       name: i.name,
@@ -134,18 +142,22 @@ export default function App() {
     words.forEach(w => freq[w] = (freq[w] || 0) + 1);
     const topW = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 8).map(e => e[0]);
 
-    const combos: Combination[] = [];
-    for (let i = 0; i < validInts.length; i++) {
-      for (let j = i + 1; j < validInts.length; j++) {
-        const si = validInts[i].scores;
-        const sj = validInts[j].scores;
-        const syn = ((si.passion + sj.passion) / 2 + (si.skill + sj.skill) / 2 + (si.impact + sj.impact) / 2) / 3 / 2;
-        combos.push({
-          a: validInts[i].name,
-          b: validInts[j].name,
-          desc: makeComboDesc(validInts[i].name, validInts[j].name),
-          score: syn
-        });
+    let combos: Combination[] = [];
+    if (aiData?.synergies) {
+      combos = aiData.synergies;
+    } else {
+      for (let i = 0; i < validInts.length; i++) {
+        for (let j = i + 1; j < validInts.length; j++) {
+          const si = validInts[i].scores;
+          const sj = validInts[j].scores;
+          const syn = ((si.passion + sj.passion) / 2 + (si.skill + sj.skill) / 2 + (si.impact + sj.impact) / 2) / 3 / 2;
+          combos.push({
+            a: validInts[i].name,
+            b: validInts[j].name,
+            desc: makeComboDesc(validInts[i].name, validInts[j].name),
+            score: syn
+          });
+        }
       }
     }
     combos.sort((a, b) => b.score - a.score);
@@ -153,9 +165,19 @@ export default function App() {
     const top1 = isc[0]?.name || validInts[0].name;
     const top2 = isc[1]?.name || (validInts[1]?.name || validInts[0].name);
     const topD = DIMS.reduce((mx, d) => agg[d.k] > agg[mx.k] ? d : mx, DIMS[0]);
-    const thread = `At the intersection of "${top1}" and "${top2}" lives your natural ${topD.l.toLowerCase()} — the invisible thread that connects everything you're drawn to.`;
+    const thread = aiData?.goldenThread || `At the intersection of "${top1}" and "${top2}" lives your natural ${topD.l.toLowerCase()} — the invisible thread that connects everything you're drawn to.`;
 
-    setResults({ ints: validInts.map(i => i.name), isc, agg, ps, topW, combos, thread });
+    setResults({ 
+      ints: validInts.map(i => i.name), 
+      isc, 
+      agg, 
+      ps, 
+      topW, 
+      combos, 
+      thread,
+      deepDives: aiData?.deepDives,
+      mindMap: aiData?.mindMap
+    });
   };
 
   const reset = () => {
@@ -495,10 +517,10 @@ export default function App() {
                   {/* Footer Actions */}
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
                     <button 
-                      onClick={() => downloadPDF(results)}
+                      onClick={() => downloadGoldenThreadZip(results)}
                       className="px-8 py-3 bg-olive text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all flex items-center gap-2"
                     >
-                      <Download size={16} /> Download Full Report (PDF)
+                      <Download size={16} /> Download Bundle (ZIP)
                     </button>
                     <button 
                       onClick={reset}
