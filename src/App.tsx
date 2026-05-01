@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Plus, X, Mic, MicOff, ArrowRight, ArrowLeft, RefreshCw, Download, Layers } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { Interest, Path, Combination } from './types';
@@ -442,11 +442,48 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* Interest Analysis Breakdown */}
+                  <div className="bg-white border border-tan rounded-2xl p-6 space-y-6 shadow-sm">
+                    <h3 className="font-serif text-base font-semibold text-olive">Interest Analysis</h3>
+                    <div className="space-y-6">
+                      {results.isc.map((item: any, idx: number) => (
+                        <div key={idx} className="space-y-3">
+                          <div className="flex justify-between items-end">
+                            <div className="space-y-1">
+                              <span className="font-mono text-[10px] text-sage">{(idx + 1).toString().padStart(2, '0')}</span>
+                              <h4 className="font-serif text-sm font-bold text-olive">{item.name}</h4>
+                            </div>
+                            <span className="font-mono text-olive text-xs font-bold">{item.total.toFixed(1)}/10</span>
+                          </div>
+                          
+                          {results.deepDives?.[item.name] && (
+                            <motion.p 
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="text-[11px] text-ink leading-relaxed italic bg-cream/50 p-2.5 rounded-lg border-l-2 border-sage"
+                            >
+                              {results.deepDives[item.name]}
+                            </motion.p>
+                          )}
+
+                          <div className="h-1 bg-tan rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.round((item.total / 10) * 100)}%` }}
+                              transition={{ duration: 1, delay: idx * 0.1 }}
+                              className="h-full bg-gradient-to-r from-olive to-sage" 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Dimension Chart */}
                   <div className="bg-white border border-tan rounded-2xl p-6 space-y-6 shadow-sm">
                     <h3 className="font-serif text-base font-semibold text-olive">Dimension Profile</h3>
-                    <div className="h-64 sm:h-80 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-64 sm:h-80 w-full relative">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={DIMS.map(d => ({ subject: d.l, value: results.agg[d.k] }))}>
                           <PolarGrid stroke="#EBE7DF" />
                           <PolarAngleAxis dataKey="subject" tick={{ fill: '#8C937A', fontSize: 11 }} />

@@ -1,6 +1,6 @@
 {
   "name": "Golden Thread Finder",
-  "description": "An application to help you find the unique connections between your interests and curiosities, inspired by Sahil Bloom's Golden Thread concept.",
+  "description": "An AI-powered discovery tool that analyzes your interests to find your 'Golden Thread'. Generates deep dives, synergy reports, and personality mind maps in a downloadable ZIP bundle.",
   "requestFramePermissions": [
     "microphone"
   ],

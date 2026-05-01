@@ -1,9 +1,21 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Interest, Combination } from "./types";
+import { Interest } from "./types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.warn("GEMINI_API_KEY is not defined. AI features will be disabled.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
+  }
+  return aiInstance;
+}
 
 export async function analyzeInterests(interests: Interest[]) {
+  const ai = getAI();
   const model = "gemini-3-flash-preview";
   
   const prompt = `
