@@ -151,7 +151,7 @@ export default function App() {
         for (let j = i + 1; j < validInts.length; j++) {
           const si = validInts[i].scores;
           const sj = validInts[j].scores;
-          const syn = ((si.passion + sj.passion) / 2 + (si.skill + sj.skill) / 2 + (si.impact + sj.impact) / 2) / 3 / 2;
+          const syn = ((si.energy + sj.energy) / 2 + (si.skill + sj.skill) / 2 + (si.leverage + sj.leverage) / 2) / 3 / 2;
           combos.push({
             a: validInts[i].name,
             b: validInts[j].name,

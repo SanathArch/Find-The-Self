@@ -4,10 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Find The Self - Golden Thread Discovery</title>
+    <style>
+      #root:empty::before {
+        content: 'Loading Find The Self...';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: serif;
+        color: #8C937A;
+        font-size: 1.2rem;
+        font-style: italic;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
+    <script>
+      if (window.location.protocol === 'file:') {
+        alert('Caution: This application uses modern web modules and cannot be viewed by opening index.html directly. To run locally, please use "npm run dev" or host it on a local web server (like VS Code Live Server).');
+        document.body.innerHTML = '<div style="padding: 40px; text-align: center; color: #8C937A; font-family: sans-serif;"><h1>Local File Access Blocked</h1><p>Modern web apps must be served via a web server. Please run <code>npm run dev</code> or follow the project instructions.</p></div>';
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
 
