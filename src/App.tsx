@@ -85,11 +85,54 @@ export default function App() {
     } : i));
   };
 
-  const handleToStep2 = () => {
-    if (interests.filter(i => i.name.trim()).length < 2) {
+  const [validating, setValidating] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const handleToStep2 = async () => {
+    const validInts = interests.filter(i => i.name.trim());
+    if (validInts.length < 2) {
       alert('Please add at least 2 interests.');
       return;
     }
+
+    setValidating(true);
+    setValidationError(null);
+
+    let hasInvalid = false;
+    for (const interest of validInts) {
+      // Split interest into words, strip punctuation
+      const words = interest.name.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').split(/\s+/).filter(w => w.length > 2);
+      if (words.length === 0) continue;
+
+      let isInterestValid = false;
+      // An interest is valid if at least one of its words is in the dictionary (to allow proper nouns mixed with words like "playing Valorant")
+      for (const word of words) {
+        try {
+          const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+          if (res.ok) {
+            isInterestValid = true;
+            break;
+          }
+        } catch (e) {
+          // If network fails, default to true to not block the user
+          isInterestValid = true;
+          break;
+        }
+      }
+
+      if (!isInterestValid) {
+        hasInvalid = true;
+        setValidationError(`"${interest.name}" doesn't seem to be a valid interest. Please use real words.`);
+        break;
+      }
+    }
+
+    setValidating(false);
+
+    if (hasInvalid) {
+      return;
+    }
+
     setStep(1);
     window.scrollTo(0, 0);
   };
@@ -335,9 +378,26 @@ export default function App() {
                 <Plus size={14} /> Add another interest
               </button>
 
-              <div className="pt-4">
-                <button onClick={handleToStep2} className="px-7 py-2.5 bg-olive text-white font-medium rounded-lg text-sm hover:opacity-90 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                  Continue <ArrowRight size={16} />
+              <div className="pt-4 space-y-3">
+                {validationError && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -5 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-600 italic"
+                  >
+                    {validationError}
+                  </motion.div>
+                )}
+                <button 
+                  onClick={handleToStep2} 
+                  disabled={validating}
+                  className="px-7 py-2.5 bg-olive text-white font-medium rounded-lg text-sm hover:opacity-90 hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {validating ? (
+                    <><RefreshCw size={16} className="animate-spin" /> Verifying...</>
+                  ) : (
+                    <>Continue <ArrowRight size={16} /></>
+                  )}
                 </button>
               </div>
             </motion.section>
