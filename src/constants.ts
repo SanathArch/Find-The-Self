@@ -12,7 +12,7 @@ export const PATHS: Path[] = [
   { n: 'The Chief Curator', d: 'Filters signal from noise in high-leverage fields. You profit from information scarcity.', w: { energy: 0.35, skill: 0.2, leverage: 0.2, longevity: 0.25 } },
   { n: 'The Scalable Builder', d: 'Uses code and content to automate insights. Thrives as a solo-capitalist.', w: { energy: 0.2, skill: 0.3, leverage: 0.35, longevity: 0.15 } },
   { n: 'The High-Value Bridge', d: 'Bridges technical leverage with human empathy. Indispensable in the AI era.', w: { energy: 0.2, skill: 0.3, leverage: 0.2, longevity: 0.3 } },
-  { n: 'The Deep Practitioner', d: 'Masters the "bore to death" skills that others quit. Your discipline is your moate.', w: { energy: 0.3, skill: 0.25, leverage: 0.15, longevity: 0.3 } },
+  { n: 'The Deep Practitioner', d: 'Masters the "bore to death" skills that others quit. Your discipline is your moat.', w: { energy: 0.3, skill: 0.25, leverage: 0.15, longevity: 0.3 } },
 ];
 
 export const CORES: Record<string, string> = {
