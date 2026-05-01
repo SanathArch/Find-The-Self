@@ -8,6 +8,7 @@ export interface Interest {
     leverage: number;
     longevity: number;
   };
+  error?: string;
 }
 
 export interface Dimension {

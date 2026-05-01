@@ -85,6 +85,39 @@ export default function App() {
     } : i));
   };
 
+  const validateInterestOnBlur = async (id: string, name: string) => {
+    if (!name.trim()) {
+      updateInterest(id, 'error', undefined);
+      return;
+    }
+    
+    const words = name.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').split(/\s+/).filter(w => w.length > 2);
+    if (words.length === 0) {
+      updateInterest(id, 'error', undefined);
+      return;
+    }
+
+    let isInterestValid = false;
+    for (const word of words) {
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+        if (res.ok) {
+          isInterestValid = true;
+          break;
+        }
+      } catch (e) {
+        isInterestValid = true;
+        break;
+      }
+    }
+
+    if (!isInterestValid) {
+      updateInterest(id, 'error', "Please enter a valid interest.");
+    } else {
+      updateInterest(id, 'error', undefined);
+    }
+  };
+
   const [validating, setValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -95,43 +128,12 @@ export default function App() {
       return;
     }
 
-    setValidating(true);
-    setValidationError(null);
-
-    let hasInvalid = false;
-    for (const interest of validInts) {
-      // Split interest into words, strip punctuation
-      const words = interest.name.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').split(/\s+/).filter(w => w.length > 2);
-      if (words.length === 0) continue;
-
-      let isInterestValid = false;
-      // An interest is valid if at least one of its words is in the dictionary (to allow proper nouns mixed with words like "playing Valorant")
-      for (const word of words) {
-        try {
-          const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-          if (res.ok) {
-            isInterestValid = true;
-            break;
-          }
-        } catch (e) {
-          // If network fails, default to true to not block the user
-          isInterestValid = true;
-          break;
-        }
-      }
-
-      if (!isInterestValid) {
-        hasInvalid = true;
-        setValidationError(`"${interest.name}" doesn't seem to be a valid interest. Please use real words.`);
-        break;
-      }
-    }
-
-    setValidating(false);
-
-    if (hasInvalid) {
+    if (validInts.some(i => i.error)) {
+      setValidationError("Please fix the invalid interests before continuing.");
       return;
     }
+    
+    setValidationError(null);
 
     setStep(1);
     window.scrollTo(0, 0);
@@ -351,22 +353,34 @@ export default function App() {
 
               <div className="space-y-2.5">
                 {interests.map((interest, idx) => (
-                  <div key={interest.id} className="group flex items-center gap-3 bg-white border border-tan rounded-xl p-3 focus-within:border-olive transition-colors shadow-sm shadow-black/5">
-                    <span className="font-mono text-[10px] text-sage w-5 text-center">{(idx + 1).toString().padStart(2, '0')}</span>
-                    <input 
-                      type="text"
-                      value={interest.name}
-                      onChange={(e) => updateInterest(interest.id, 'name', e.target.value)}
-                      placeholder={PLACEHOLDERS[idx % PLACEHOLDERS.length] || 'Another interest...'}
-                      className="bg-transparent border-none outline-none w-full text-sm placeholder-sage/40"
-                      maxLength={60}
-                    />
-                    <button 
-                      onClick={() => removeInterest(interest.id)}
-                      className="text-sage hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <X size={16} />
-                    </button>
+                  <div key={interest.id} className="space-y-1.5">
+                    <div className={`group flex items-center gap-3 bg-white border ${interest.error ? 'border-red-400 focus-within:border-red-500' : 'border-tan focus-within:border-olive'} rounded-xl p-3 transition-colors shadow-sm shadow-black/5`}>
+                      <span className={`font-mono text-[10px] ${interest.error ? 'text-red-400' : 'text-sage'} w-5 text-center`}>{(idx + 1).toString().padStart(2, '0')}</span>
+                      <input 
+                        type="text"
+                        value={interest.name}
+                        onChange={(e) => updateInterest(interest.id, 'name', e.target.value)}
+                        onBlur={() => validateInterestOnBlur(interest.id, interest.name)}
+                        placeholder={PLACEHOLDERS[idx % PLACEHOLDERS.length] || 'Another interest...'}
+                        className="bg-transparent border-none outline-none w-full text-sm placeholder-sage/40"
+                        maxLength={60}
+                      />
+                      <button 
+                        onClick={() => removeInterest(interest.id)}
+                        className="text-sage hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    {interest.error && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -2 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        className="px-2 text-[11px] text-red-500 italic"
+                      >
+                        {interest.error}
+                      </motion.div>
+                    )}
                   </div>
                 ))}
               </div>
